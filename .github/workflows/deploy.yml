@@ -1,43 +1,53 @@
-name: Deploy to GitHub Pages
+# Simple workflow to deploy the batch_calculator.html to GitHub Pages
+name: Deploy Batch Calculator to GitHub Pages
 
+# Run on pushes to the main branch
 on:
   push:
-    branches:
-      - main # Or your main branch name
+    branches: ["main"]
+
+# Allow this job to clone the repo and create a page deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Node.js (if needed for build)
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your required Node.js version
+          node-version: 20
+          cache: 'npm' # Not strictly needed for this, but good practice
+          
+      - name: Build static site
+        run: |
+          # Create a directory for the static site
+          mkdir -p _site
+          
+          # Copy the HTML file to be the root index.html
+          cp batch_calculator.html _site/index.html
 
-      - name: Install dependencies (if needed)
-        run: npm install
-
-      - name: Build site (if needed)
-        run: npm run build # Replace with your build command
-
-      - name: Upload GitHub Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build # Replace with the path to your built site files
+          # Upload the _site directory
+          path: './_site'
 
   deploy:
+    # This job needs the build job to be successful
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build # Ensure the build job completes before deploying
-    permissions:
-      pages: write
-      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+

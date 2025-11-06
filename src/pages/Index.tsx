@@ -1,19 +1,28 @@
 import { useState } from 'react';
-import { Calculator as CalculatorIcon, BookOpen, Package } from 'lucide-react';
+import { Calculator as CalculatorIcon, BookOpen, Package, Calendar } from 'lucide-react';
 import { Calculator } from '@/components/Calculator';
 import { RecipeManager } from '@/components/RecipeManager';
 import { PackageSizeManager } from '@/components/PackageSizeManager';
+import { EventTemplateManager } from '@/components/EventTemplateManager';
+import type { EventTemplate } from '@/types/beverage';
 
-type TabType = 'calculator' | 'recipes' | 'packages';
+type TabType = 'calculator' | 'recipes' | 'packages' | 'templates';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('calculator');
+  const [loadedTemplate, setLoadedTemplate] = useState<EventTemplate | undefined>();
 
   const tabs = [
     { id: 'calculator' as TabType, label: 'Calculator', icon: CalculatorIcon },
     { id: 'recipes' as TabType, label: 'Recipes', icon: BookOpen },
     { id: 'packages' as TabType, label: 'Package Sizes', icon: Package },
+    { id: 'templates' as TabType, label: 'Templates', icon: Calendar },
   ];
+
+  const handleLoadTemplate = (template: EventTemplate) => {
+    setLoadedTemplate(template);
+    setActiveTab('calculator');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,9 +69,10 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-8">
-        {activeTab === 'calculator' && <Calculator />}
+        {activeTab === 'calculator' && <Calculator initialTemplate={loadedTemplate} />}
         {activeTab === 'recipes' && <RecipeManager />}
         {activeTab === 'packages' && <PackageSizeManager />}
+        {activeTab === 'templates' && <EventTemplateManager onLoadTemplate={handleLoadTemplate} />}
       </main>
 
       {/* Footer */}

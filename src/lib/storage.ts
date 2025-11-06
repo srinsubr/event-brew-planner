@@ -1,9 +1,10 @@
-import { Recipes, PackageSizes, StoreMap } from '@/types/beverage';
+import { Recipes, PackageSizes, StoreMap, EventTemplate } from '@/types/beverage';
 
 const STORAGE_KEYS = {
   RECIPES: 'beverage-planner-recipes',
   PACKAGE_SIZES: 'beverage-planner-package-sizes',
   STORE_MAP: 'beverage-planner-store-map',
+  TEMPLATES: 'beverage-planner-templates',
 };
 
 export const getDefaultRecipes = (): Recipes => ({
@@ -68,4 +69,36 @@ export const loadStoreMap = (): StoreMap => {
 
 export const saveStoreMap = (map: StoreMap): void => {
   localStorage.setItem(STORAGE_KEYS.STORE_MAP, JSON.stringify(map));
+};
+
+export const loadTemplates = (): EventTemplate[] => {
+  const stored = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const saveTemplates = (templates: EventTemplate[]): void => {
+  localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(templates));
+};
+
+export const saveTemplate = (template: Omit<EventTemplate, 'id' | 'createdAt'>): EventTemplate => {
+  const templates = loadTemplates();
+  const newTemplate: EventTemplate = {
+    ...template,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+  templates.push(newTemplate);
+  saveTemplates(templates);
+  return newTemplate;
+};
+
+export const deleteTemplate = (id: string): void => {
+  const templates = loadTemplates();
+  const filtered = templates.filter(t => t.id !== id);
+  saveTemplates(filtered);
+};
+
+export const loadTemplate = (id: string): EventTemplate | null => {
+  const templates = loadTemplates();
+  return templates.find(t => t.id === id) || null;
 };

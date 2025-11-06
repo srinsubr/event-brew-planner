@@ -39,3 +39,14 @@ export interface ShoppingLists {
   amazonPrep: ShoppingListItem[];
   other: ShoppingListItem[];
 }
+
+export interface EventTemplate {
+  id: string;
+  name: string;
+  coffeeBatches: number;
+  teaBatches: number;
+  recipes: Recipes;
+  packageSizes: PackageSizes;
+  storeMap: StoreMap;
+  createdAt: string;
+}

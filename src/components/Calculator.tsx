@@ -1,17 +1,44 @@
 import { useState, useEffect } from 'react';
-import { Coffee, Leaf } from 'lucide-react';
+import { Coffee, Leaf, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ShoppingListCard } from './ShoppingListCard';
 import { calculateShoppingLists } from '@/lib/calculator';
-import { loadRecipes, loadPackageSizes, loadStoreMap } from '@/lib/storage';
-import type { ShoppingLists } from '@/types/beverage';
+import { loadRecipes, loadPackageSizes, loadStoreMap, saveTemplate, saveRecipes, savePackageSizes, saveStoreMap } from '@/lib/storage';
+import type { ShoppingLists, EventTemplate, Recipes, PackageSizes, StoreMap } from '@/types/beverage';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
-export const Calculator = () => {
-  const [coffeeBatches, setCoffeeBatches] = useState(0);
-  const [teaBatches, setTeaBatches] = useState(0);
+interface CalculatorProps {
+  initialTemplate?: EventTemplate;
+}
+
+export const Calculator = ({ initialTemplate }: CalculatorProps) => {
+  const [coffeeBatches, setCoffeeBatches] = useState(initialTemplate?.coffeeBatches || 0);
+  const [teaBatches, setTeaBatches] = useState(initialTemplate?.teaBatches || 0);
   const [shoppingLists, setShoppingLists] = useState<ShoppingLists | null>(null);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (initialTemplate) {
+      setCoffeeBatches(initialTemplate.coffeeBatches);
+      setTeaBatches(initialTemplate.teaBatches);
+      saveRecipes(initialTemplate.recipes);
+      savePackageSizes(initialTemplate.packageSizes);
+      saveStoreMap(initialTemplate.storeMap);
+    }
+  }, [initialTemplate]);
 
   useEffect(() => {
     const recipes = loadRecipes();
@@ -29,6 +56,38 @@ export const Calculator = () => {
     setShoppingLists(lists);
   }, [coffeeBatches, teaBatches]);
 
+  const handleSaveTemplate = () => {
+    if (!templateName.trim()) {
+      toast({
+        title: 'Name required',
+        description: 'Please enter a name for your template.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const recipes = loadRecipes();
+    const packageSizes = loadPackageSizes();
+    const storeMap = loadStoreMap();
+
+    saveTemplate({
+      name: templateName,
+      coffeeBatches,
+      teaBatches,
+      recipes,
+      packageSizes,
+      storeMap,
+    });
+
+    toast({
+      title: 'Template saved',
+      description: `"${templateName}" has been saved successfully.`,
+    });
+
+    setShowSaveDialog(false);
+    setTemplateName('');
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
       <header className="text-center space-y-3">
@@ -39,6 +98,18 @@ export const Calculator = () => {
       </header>
 
       <Card className="p-8 shadow-card">
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={() => setShowSaveDialog(true)}
+            variant="outline"
+            size="sm"
+            disabled={coffeeBatches === 0 && teaBatches === 0}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Save as Template
+          </Button>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <Label htmlFor="coffee-batches" className="text-base font-semibold flex items-center gap-2">
@@ -123,6 +194,41 @@ export const Calculator = () => {
           )}
         </div>
       )}
+
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Event Template</DialogTitle>
+            <DialogDescription>
+              Save your current configuration (batches, recipes, and package sizes) as a reusable template.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="template-name">Template Name</Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., Company Picnic, Monthly Meeting"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveTemplate()}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <div>Coffee Batches: {coffeeBatches}</div>
+              <div>Tea Batches: {teaBatches}</div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveTemplate}>
+              Save Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

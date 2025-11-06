@@ -9,29 +9,35 @@ const STORAGE_KEYS = {
 
 export const getDefaultRecipes = (): Recipes => ({
   Coffee: {
-    'Coffee Powder (g)': 500,
-    'Sugar (g)': 1000,
-    'Milk (l)': 4,
-    'Water (l)': 4,
+    'Coffee beans (lbs)': 2,
+    'Chicory (g)': 300,
+    'Sugar (g)': 300,
+    'Milk (gallon)': 3,
+    'Water (gallon)': 1,
   },
   Tea: {
-    'Tea Powder (g)': 100,
-    'Sugar (g)': 1000,
-    'Milk (l)': 4,
-    'Water (l)': 4,
-    'Ginger (g)': 50,
+    'Tea Powder (g)': 300,
+    'Sugar (g)': 500,
+    'Milk (gallon)': 2,
+    'Water (gallon)': 2,
+    'Ginger (g)': 100,
     'Cardamom (g)': 10,
+    'Cloves (g)': 5,
+    'Cinnamon (g)': 5,
   },
 });
 
 export const getDefaultPackageSizes = (): PackageSizes => ({
-  'Coffee Powder (g)': 1000,
-  'Tea Powder (g)': 500,
-  'Sugar (g)': 2000,
-  'Milk (l)': 4,
-  'Water (l)': 1,
-  'Ginger (g)': 100,
+  'Coffee beans (lbs)': 2,
+  'Tea leaves (lbs)': 2,
+  'Sugar (lbs)': 10,
+  'Milk (gallon)': 1.5,
+  'Water (gallon)': 6,
+  'Ginger (lbs)': 1.75,
   'Cardamom (g)': 50,
+  'Cloves (g)': 50,
+  'Cinnamon (g)': 50,
+  
 });
 
 export const getDefaultStoreMap = (): StoreMap => ({
@@ -42,6 +48,7 @@ export const getDefaultStoreMap = (): StoreMap => ({
   'Water (l)': 'other',
   'Ginger (g)': 'indianStorePrep',
   'Cardamom (g)': 'indianStorePrep',
+  'Cloves (g)': 'indianStorePrep',
 });
 
 export const loadRecipes = (): Recipes => {
